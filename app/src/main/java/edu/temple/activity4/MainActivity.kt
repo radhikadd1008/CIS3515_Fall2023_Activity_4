@@ -20,25 +20,40 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         textSizeSelector = findViewById(R.id.textSizeSelectorRecyclerView)
         textSizeDisplay = findViewById(R.id.textSizeDisplayTextView)
+
+
         // Trying to create array of integers that are multiples of 5
         // Verify correctness by examining array values.
         val textSizes = Array(20){(it + 1) * 5}
+        val callback = {textSize: Float -> textSizeDisplay.textSize = textSize}
 
         Log.d("Array Values", textSizes.contentToString())
-
-        textSizeSelector.adapter = TextSizeAdapter(textSizes)
+        with (findViewById(R.id.textSizeSelectorRecyclerView) as RecyclerView) {
+            adapter = TextSizeAdapter(textSizes){
+                textSizeDisplay.textSize = it;
+            }
+        }
+        textSizeSelector.adapter = TextSizeAdapter(textSizes, callback)
         textSizeSelector.layoutManager = LinearLayoutManager(this)
+
+
     }
 }
 
 
 /* Convert to RecyclerView.Adapter */
-class TextSizeAdapter(_textSizes : Array<Int>) : RecyclerView.Adapter<TextSizeAdapter.TextSizeViewHolder>() {
+class TextSizeAdapter(_textSizes : Array<Int>, _callback : (Float) -> Unit ) : RecyclerView.Adapter<TextSizeAdapter.TextSizeViewHolder>() {
 
     val textSizes = _textSizes
-    class TextSizeViewHolder(view: TextView) : RecyclerView.ViewHolder (view) {
+    val callback = _callback
+
+    inner class TextSizeViewHolder(view: TextView) : RecyclerView.ViewHolder (view) {
 
         val textView = view
+
+        init {
+            textView.setOnClickListener { callback(textSizes[adapterPosition].toFloat()) }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextSizeViewHolder {
@@ -50,6 +65,7 @@ class TextSizeAdapter(_textSizes : Array<Int>) : RecyclerView.Adapter<TextSizeAd
         override fun onBindViewHolder(holder: TextSizeViewHolder, position: Int) {
             holder.textView.text = textSizes[position].toString()
             holder.textView.textSize = textSizes[position].toFloat()
+
         }
 
 
