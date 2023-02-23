@@ -1,5 +1,6 @@
 package edu.temple.activity4
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -10,10 +11,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.w3c.dom.Text
 
+const val MESSAGE_KEY = "text value"
 class MainActivity : AppCompatActivity() {
 
     lateinit var textSizeSelector: RecyclerView
     lateinit var textSizeDisplay: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,14 +30,21 @@ class MainActivity : AppCompatActivity() {
         val textSizes = Array(20){(it + 1) * 5}
         val callback = {textSize: Float -> textSizeDisplay.textSize = textSize}
 
+
+        textSizeSelector.adapter = TextSizeAdapter(textSizes, callback)
+        textSizeSelector.layoutManager = LinearLayoutManager(this)
+
+
         Log.d("Array Values", textSizes.contentToString())
         with (findViewById(R.id.textSizeSelectorRecyclerView) as RecyclerView) {
             adapter = TextSizeAdapter(textSizes){
-                textSizeDisplay.textSize = it;
+                //textSizeDisplay.textSize = it;
+                val launchIntent = Intent(this@MainActivity, NewActivity::class.java)
+                launchIntent.putExtra(MESSAGE_KEY, it)
+                startActivity(launchIntent)
+
             }
         }
-        textSizeSelector.adapter = TextSizeAdapter(textSizes, callback)
-        textSizeSelector.layoutManager = LinearLayoutManager(this)
 
 
     }
@@ -52,7 +62,10 @@ class TextSizeAdapter(_textSizes : Array<Int>, _callback : (Float) -> Unit ) : R
         val textView = view
 
         init {
-            textView.setOnClickListener { callback(textSizes[adapterPosition].toFloat()) }
+            textView.setOnClickListener {
+                callback(textSizes[adapterPosition].toFloat())
+
+            }
         }
     }
 
